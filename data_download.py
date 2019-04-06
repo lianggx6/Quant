@@ -126,6 +126,7 @@ if __name__ == "__main__":
     # get_hs300_stock_bonus()
     # get_hs300_stock_valuation()
     # get_hs300_index_info()
-    # get_hs300_future_price()
-    get_settle_param()
+    get_hs300_future_price()
+    # get_settle_param()
+
     get_remain()

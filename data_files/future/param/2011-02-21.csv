@@ -1,0 +1,5 @@
+,name,long_rate,short_rate,trade_rate,settle_rate,close_rate
+IF1103.CCFX,IF1103,0.15,0.15,5e-05,0.0001,1.0
+IF1104.CCFX,IF1104,0.15,0.15,5e-05,0.0001,1.0
+IF1106.CCFX,IF1106,0.18,0.18,5e-05,0.0001,1.0
+IF1109.CCFX,IF1109,0.18,0.18,5e-05,0.0001,1.0

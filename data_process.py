@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 
 import pandas as pd
@@ -30,17 +31,114 @@ def process_date():
     for fp in os.listdir(path):
         fp = os.path.join(path, fp)
         df = pd.read_csv(fp)
-        df["date"] = df["date"].apply(lambda x:datetime.strptime(x, "%Y/%m/%d"))
+        df["date"] = df["date"].apply(lambda x: datetime.strptime(x, "%Y/%m/%d"))
         df.to_csv(fp)
 
 
-def process_param():
+def process_param1():
     base_path = r"data_files\future\param"
     for fp in os.listdir(base_path):
-        if(os.path.getsize(os.path.join(base_path, fp))) == 2132:
+        if (os.path.getsize(os.path.join(base_path, fp))) == 2132:
             os.remove(os.path.join(base_path, fp))
+
+
+def process_param2():
+    base_path = r"data_files\future\param"
+    for fp in os.listdir(base_path):
+        file_path = os.path.join(base_path, fp)
+        df = pd.read_csv(file_path, encoding="gbk")
+        df.to_csv(file_path, header=None)
+
+
+def process_param3():
+    base_path = r"data_files\future\param"
+    for fp in os.listdir(base_path):
+        file_path = os.path.join(base_path, fp)
+        df = pd.read_csv(file_path)
+        df.columns = ["name", "long_rate", "short_rate", "trade_rate", "settle_rate", "close_rate"]
+        df["name"] = df["name"].apply(lambda x: x.strip())
+        df.index = df["name"].map(lambda x: x + ".CCFX")
+        df.index.name = None
+        df = df.loc[df["name"].str.startswith("IF")]
+        df.to_csv(file_path)
+
+
+def process_param4():
+    base_path = r"data_files\future\param"
+    for fp in os.listdir(base_path):
+        file_path = os.path.join(base_path, fp)
+        df = pd.read_csv(file_path)
+        if len(df["close_rate"][2]) > 5 and df["close_rate"][2] != "10000%":
+            print(fp)
+
+
+def process_param5():
+    base_path = r"data_files\future\param"
+    for fp in os.listdir(base_path):
+        file_path = os.path.join(base_path, fp)
+        df = pd.read_csv(file_path, index_col=0)
+        df["long_rate"] = df["long_rate"].apply(lambda x:float(x.replace("%", ""))/100)
+        df["short_rate"] = df["short_rate"].apply(lambda x: float(x.replace("%", "")) / 100)
+        df["close_rate"] = df["close_rate"].apply(lambda x: float(x.replace("%", "")) / 100)
+        df["trade_rate"] = df["trade_rate"].apply(lambda x: float(re.search(r"\d+(\.\d+)?", x).group(0))/10000)
+        df["settle_rate"] = df["settle_rate"].apply(lambda x: float(re.search(r"\d+(\.\d+)?", x).group(0))/10000)
+        df.to_csv(file_path)
+
+
+def process_param6():
+    base_path = r"data_files\future\param"
+    for fp in os.listdir(base_path):
+        file_path = os.path.join(base_path, fp)
+        new_fp = datetime.strptime(fp[:8],"%Y%m%d").strftime("%Y-%m-%d.csv")
+        os.rename(file_path, os.path.join(base_path, new_fp))
+
+
+def process_rate1():
+    base_path = r"data_files\rate"
+    rates = pd.DataFrame()
+    for fp in os.listdir(base_path):
+        file_path = os.path.join(base_path, fp)
+        df = pd.read_csv(file_path)
+        rates = rates.append(df, sort=False)
+    rates.to_csv(os.path.join(base_path, "rates.csv"))
+
+
+def process_rate2():
+    row_path = r"data_files\rate\rates.csv"
+    info_path = r"data_files\index\HS300_index.csv"
+    store_path = r"data_files\rate\%s.csv"
+    index = pd.read_csv(info_path, index_col=0)
+    rates = pd.read_csv(row_path, index_col=0)
+    rates.index = pd.to_datetime(rates.index)
+    for date in index.index:
+        df = rates.loc[rates.index == date]
+        df.to_csv(store_path % date)
+
+
+def process_future_info_date():
+    future_path = r"data_files\future\hs300_future_info.csv"
+    df = pd.read_csv(future_path, index_col=0)
+    df["start_date"] = pd.to_datetime(df["start_date"])
+    df["end_date"] = pd.to_datetime(df["end_date"])
+    df.to_csv(future_path)
+
+
+def process_settle():
+    settle_path = r"data_files\future\settle\settle.csv"
+    df = pd.read_csv(settle_path, index_col=0)
+    df.columns = map(lambda x: x[:6], df.columns)
+    df.to_csv(settle_path)
+    print(df)
 
 
 if __name__ == "__main__":
     # process_date()
-    process_param()
+    # process_param2()
+    # process_param3()
+    # process_param4()
+    # process_rate1()
+    # process_rate2()
+    # process_param5()
+    # process_future_info_date()
+    # process_param6()
+    process_settle()
