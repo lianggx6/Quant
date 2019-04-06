@@ -8,7 +8,7 @@ def integrate_data():
     param_path = r"data_files\future\param"
     future_path = r"data_files\future\hs300_future_info.csv"
     settle_path = r"data_files\future\settle\settle.csv"
-    result_path = r"data_files\results\cost_carry_model_without_bonus.csv"
+    future_quote_path = r"data_files\future\quote\%s.csv"
     hs300 = pd.read_csv(hs300_path, index_col=0)
     future_info = pd.read_csv(future_path, index_col=0)
     settle = pd.read_csv(settle_path, index_col=0)
@@ -26,16 +26,17 @@ def integrate_data():
         result.loc[date, "0d_rate"] = rates.loc[rates["term"] == "0d"]["rate"][0]
         result.loc[date, "1m_rate"] = rates.loc[rates["term"] == "1m"]["rate"][0]
         result.loc[date, "settle_price"] = settle.loc[date, result.loc[date, "main_contract"]]
-    result.to_csv(result_path)
+        result.loc[date, "close_price"] = pd.read_csv(future_quote_path % result.loc[date, "main_contract"], index_col=0).loc[date, "close"]
     return result
 
 
-def cal_stock_bonus():
-    pass
-
-
 def cost_carry_model():
+    result_path = r"data_files\results\cost_carry_model_without_bonus.csv"
     result = integrate_data()
+    result["remaining_days"] = pd.to_datetime(result["end_date"]) - pd.to_datetime(result.index)
+    result["remaining_days"] = result["remaining_days"].apply(lambda x: x.days)
+    result["future"] = result["index_price"] + result["index_price"]*(1-result["long_rate"])*result["remaining_days"]/365*result["0d_rate"]/100
+    result.to_csv(result_path)
     print(result)
 
 

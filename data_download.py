@@ -118,7 +118,7 @@ def get_remain():
 
 if __name__ == "__main__":
     auth("15066299571", "jiayouLGX,1996.")
-    # get_hs300_future()
+    get_hs300_future()
     # get_future_info()
     # get_hs300_index()
     # get_hs300_stock_info()
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     # get_hs300_stock_bonus()
     # get_hs300_stock_valuation()
     # get_hs300_index_info()
-    get_hs300_future_price()
+    # get_hs300_future_price()
     # get_settle_param()
 
     get_remain()
