@@ -179,14 +179,13 @@ def process_bonus1():
 
 
 def process_bonus2():
-    bonus_path = r"data_files\stock\bonus"
+    bonus_path = r"data_files\bonus"
     for fp in os.listdir(bonus_path):
         file_path = os.path.join(bonus_path, fp)
         df = pd.read_csv(file_path, index_col=0)
-        for s in df["plan_progress"]:
-            if s != "实施方案":
-                print(fp)
-                break
+        df.rename(columns={"code.1": "code"}, inplace=True)
+        df.index = [x for x in df["code"]]
+        df.to_csv(file_path)
 
 
 def process_weight1():
@@ -257,8 +256,8 @@ if __name__ == "__main__":
     # process_param6()
     # process_settle()
     # process_future_quote()
-    # process_bonus2()
+    process_bonus2()
     # process_weight()
     # process_value_name()
-    process_value()
+    # process_value()
     # process_weight2()
