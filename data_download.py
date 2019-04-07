@@ -66,19 +66,13 @@ def get_hs300_stock_bonus():
 
 
 def get_hs300_stock_valuation():
-    code_path = r"data_files\stock\hs300_stocks.json"
-    store_path = r"data_files\stock\value\%s.csv"
-    with open(code_path, "r") as f:
-        stocks = json.load(f)
-    stock_set = set()
-    for value in stocks.values():
-        stock_set.update(value)
+    store_path = r"data_files\temp\%s.csv"
+    stock_set = ['600760.XSHG', '002032.XSHE', '002120.XSHE', '002179.XSHE', '002271.XSHE', '002311.XSHE', '300142.XSHE', '603156.XSHG', '300296.XSHE', '002773.XSHE', '603986.XSHG', '601066.XSHG', '603259.XSHG', '601138.XSHG']
     for stock in stock_set:
-        if stock.startswith("60"):
-            q = query(valuation.market_cap).filter(valuation.code == stock)
-            panel = get_fundamentals_continuously(q, end_date="2019-01-01", count=8 * 250)
-            df = panel.minor_xs(stock)
-            df.to_csv(store_path % stock)
+        q = query(valuation.market_cap).filter(valuation.code == stock)
+        panel = get_fundamentals_continuously(q, end_date="2019-01-01", count=8 * 250)
+        df = panel.minor_xs(stock)
+        df.to_csv(store_path % stock)
 
 
 def get_hs300_index_info():
@@ -118,7 +112,7 @@ def get_remain():
 
 if __name__ == "__main__":
     auth("15066299571", "jiayouLGX,1996.")
-    get_hs300_future()
+    # get_hs300_future()
     # get_future_info()
     # get_hs300_index()
     # get_hs300_stock_info()
@@ -128,5 +122,5 @@ if __name__ == "__main__":
     # get_hs300_index_info()
     # get_hs300_future_price()
     # get_settle_param()
-
+    get_hs300_stock_valuation()
     get_remain()

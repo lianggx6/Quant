@@ -179,7 +179,70 @@ def process_bonus1():
 
 
 def process_bonus2():
-    pass
+    bonus_path = r"data_files\stock\bonus"
+    for fp in os.listdir(bonus_path):
+        file_path = os.path.join(bonus_path, fp)
+        df = pd.read_csv(file_path, index_col=0)
+        for s in df["plan_progress"]:
+            if s != "实施方案":
+                print(fp)
+                break
+
+
+def process_weight1():
+    info_path = r"data_files\index\HS300_index.csv"
+    weight_path = r"data_files\index\weight\%s.csv"
+    info = pd.read_csv(info_path, index_col=0)
+    for date in info.index:
+        if date <= "2012-05-30":
+            continue
+        df = pd.read_csv(weight_path % date, index_col=0)
+        # df = df.set_index(df["code"])
+        df.index = map(lambda x: x[:6], df.index)
+        df.to_csv(weight_path % date)
+
+
+def process_weight2():
+    def f(x):
+        x = str(x).zfill(6)
+        if x.startswith("60"):
+            return x + ".XSHG"
+        else:
+            return x + ".XSHE"
+    info_path = r"data_files\index\HS300_index.csv"
+    weight_path = r"data_files\index\weight\%s.csv"
+    info = pd.read_csv(info_path, index_col=0)
+    for date in info.index:
+        df = pd.read_csv(weight_path % date, index_col=0)
+        df.index = map(f, df.index)
+        df.to_csv(weight_path % date)
+        # print(df)
+        # break
+
+
+def process_value_name():
+    base_path = r"data_files\stock\value"
+    for fp in os.listdir(base_path):
+        new_fp = fp[:6] + ".csv"
+        os.rename(os.path.join(base_path, fp), os.path.join(base_path, new_fp))
+
+
+def process_value():
+    info_path = r"data_files\index\HS300_index.csv"
+    weight_path = r"data_files\index\weight\%s.csv"
+    value_path = r"data_files\stock\value\%s.csv"
+    info = pd.read_csv(info_path, index_col=0)
+    for date in info.index:
+        if date < "2018-12-28":
+            continue
+        print(date)
+        weight = pd.read_csv(weight_path % date, index_col=0)
+
+        for code in weight.index:
+            value = pd.read_csv(value_path % code, index_col=0)
+            weight.loc[code, "market_cap"] = value.loc[date, "market_cap"]
+        # print(weight)
+        weight.to_csv(weight_path % date)
 
 
 if __name__ == "__main__":
@@ -194,4 +257,8 @@ if __name__ == "__main__":
     # process_param6()
     # process_settle()
     # process_future_quote()
-    process_bonus1()
+    # process_bonus2()
+    # process_weight()
+    # process_value_name()
+    process_value()
+    # process_weight2()

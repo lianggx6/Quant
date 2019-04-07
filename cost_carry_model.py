@@ -30,6 +30,11 @@ def integrate_data():
     return result
 
 
+def calculate_bonus(start_date, end_date):
+
+    pass
+
+
 def cost_carry_model_without_bonus():
     result_path = r"data_files\results\cost_carry_model_without_bonus.csv"
     result = integrate_data()
