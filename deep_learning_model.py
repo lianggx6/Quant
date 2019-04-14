@@ -4,8 +4,8 @@ from util import *
 import numpy as np
 import tensorflow as tf
 
-index_max = 5380.43
-index_min = 2023.17
+index_max = 6000
+index_min = 2000
 
 
 def normalize_index(seq):
@@ -34,10 +34,10 @@ def load_data():
     result["high"] = normalize_index(result["high"])
     result["low"] = normalize_index(result["low"])
     result["open"] = normalize_index(result["open"])
+    result["settle_price"] = normalize_index(result["settle_price"])
     result["volume"] = normalize(np.array(result["volume"]))[0]
     result["money"] = normalize(np.array(result["money"]))[0]
     result["remaining_days"] = normalize(np.array(result["remaining_days"]))[0]
-    result["settle_price"] = normalize(np.array(result["settle_price"]))[0]
     bonus["bonus_ratio"] = normalize(np.array(bonus["bonus_ratio"]))[0]
 
     for term in ["0d", "1m", "3m", "6m", "9m", "1y"]:
@@ -74,29 +74,42 @@ def load_data():
            (quote_test_data, rate_test_data, dense_test_data, test_labels)
 
 
-def training(train_data, test_data):
+def training(train_data, test_data=None):
     quote_input = Input(shape=(20, 6))
     rate_input = Input(shape=(20, 6))
     dense_input = Input(shape=(3,))
 
-    quote_layer1 = layers.CuDNNLSTM(60)(quote_input)
-    rate_layer1 = layers.CuDNNLSTM(60)(rate_input)
+    quote_layer = layers.CuDNNLSTM(40)(quote_input)
+    rate_layer = layers.CuDNNLSTM(40)(rate_input)
 
-    full_input = layers.concatenate([quote_layer1, rate_layer1, dense_input])
-    dense_layer1 = layers.Dense(10, activation=tf.nn.relu)(full_input)
-    drop_layer = layers.Dropout(0.1)(dense_layer1)
-    prediction = layers.Dense(1, activation=tf.nn.softmax)(drop_layer)
+    full_input = layers.concatenate([quote_layer, rate_layer, dense_input])
+    dense_layer = layers.Dense(20, activation=tf.nn.relu)(full_input)
+    dense_layer = layers.Dense(10, activation=tf.nn.relu)(dense_layer)
+    prediction = layers.Dense(1, activation=tf.nn.sigmoid)(dense_layer)
 
     model = Model(inputs=[quote_input, rate_input, dense_input], outputs=prediction)
-    model.compile(optimizer=tf.train.AdamOptimizer(0.001),
-                  loss=losses.mse,
-                  metrics=[metrics.mse])
+    model.compile(optimizer=tf.train.AdamOptimizer(0.005),
+                  loss="mse",
+                  metrics=["mse"])
 
-    model.fit([train_data[0], train_data[1], train_data[2]], train_data[3], epochs=50,
-              callbacks=[callbacks.TensorBoard(log_dir='./logs')])
+    model.fit([train_data[0], train_data[1], train_data[2]], train_data[3], epochs=2000,
+              validation_data=([test_data[0], test_data[1], test_data[2]], test_data[3]),
+              batch_size=50, callbacks=[callbacks.TensorBoard(log_dir='./logs')])
+    model.save(r"data_files\results\my_model_temp.h5")
+
+
+def predict(test_data):
+    model = models.load_model(r"data_files\results\my_model.h5")
+    model.compile(optimizer=tf.train.AdamOptimizer(0.005),
+                  loss="mse",
+                  metrics=["mse"])
+    model.evaluate([test_data[0], test_data[1], test_data[2]], test_data[3])
+    result = model.predict([test_data[0], test_data[1], test_data[2]])
+    pd.DataFrame(re_normalize_index(result)).to_csv(r"data_files\results\deep_model.csv")
 
 
 if __name__ == "__main__":
     train, test = load_data()
     print("---------------------------load data end--------------------------")
-    training(train, test)
+    # training(train, test)
+    predict(test)
