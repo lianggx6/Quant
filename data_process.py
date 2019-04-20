@@ -208,6 +208,7 @@ def process_weight2():
             return x + ".XSHG"
         else:
             return x + ".XSHE"
+
     info_path = r"data_files\index\HS300_index.csv"
     weight_path = r"data_files\index\weight\%s.csv"
     info = pd.read_csv(info_path, index_col=0)

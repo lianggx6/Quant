@@ -111,5 +111,5 @@ def predict(test_data):
 if __name__ == "__main__":
     train, test = load_data()
     print("---------------------------load data end--------------------------")
-    # training(train, test)
-    predict(test)
+    training(train, test)
+    # predict(test)

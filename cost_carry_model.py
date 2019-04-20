@@ -3,22 +3,20 @@ from util import *
 
 def cost_carry_model_without_bonus():
     result_path = r"data_files\results\cost_carry_model_without_bonus.csv"
-    result = integrate_data()
+    result = integrate_data("2018-01-01")
 
     result["future"] = result["index_price"] + result["index_price"] * \
-                       (1 - result["long_rate"]) * result["remaining_days"] / 365 * result["0d_rate"] / 100
+        (1 - result["long_rate"]) * result["remaining_days"] / 365 * result["0d_rate"] / 100
     result.to_csv(result_path)
     return result
 
 
 def cost_carry_model_with_bonus():
     result_path = r"data_files\results\cost_carry_model_with_bonus.csv"
-    bonus = calculate_bonus()
+    bonus = calculate_bonus("2018-01-01")
     result = cost_carry_model_without_bonus()
-    result["future_new"] = result["index_price"] + \
-                           result["index_price"] * (1 - result["long_rate"]) * result["remaining_days"] / 365 * result[
-                               "0d_rate"] / 100 - \
-                           bonus["bonus_ratio"] * result["index_price"]
+    result["future_new"] = result["index_price"] + result["index_price"] * (1 - result["long_rate"]) * \
+        result["remaining_days"] / 365 * result["0d_rate"] / 100 - bonus["bonus_ratio"] * result["index_price"]
     result.to_csv(result_path)
 
 
